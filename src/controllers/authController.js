@@ -1,41 +1,45 @@
-
+const pool = require("../config/db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-let usuarios = [];
-
 const registrar = async (req, res) => {
-    const { nombre, password } = req.body;
+    const { nombre, email, password } = req.body;
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const usuario = {
-        id: usuarios.length + 1,
-        nombre,
-        password: passwordHash
-    };
+    const result = await pool.query(
+    "INSERT INTO usuarios (nombre, email, password) VALUES ($1,$2,$3) RETURNING id,nombre,email",
+    [nombre, email, hashedPassword]
+    );
 
-    usuarios.push(usuario);
-
-    res.json({ mensaje: "Usuario creado" });
+    res.json(result.rows[0]);
 };
 
 const login = async (req, res) => {
-    const { nombre, password } = req.body;
+    const { email, password } = req.body;
 
-    const usuario = usuarios.find(u => u.nombre === nombre);
+    const result = await pool.query(
+    "SELECT * FROM usuarios WHERE email=$1",
+    [email]
+    );
 
-    if (!usuario) {
-        return res.status(404).json({ error: "Usuario no encontrado" });
+    const user = result.rows[0];
+
+    if (!user) {
+    return res.status(401).json({ error: "Usuario no encontrado" });
     }
 
-    const valido = await bcrypt.compare(password, usuario.password);
+    const valido = await bcrypt.compare(password, user.password);
 
     if (!valido) {
-        return res.status(401).json({ error: "Password incorrecta" });
+    return res.status(401).json({ error: "Contraseña incorrecta" });
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "1h" })
+    const token = jwt.sign(
+    { id: user.id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+    );
 
     res.json({ token });
 };
