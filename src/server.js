@@ -9,7 +9,7 @@ const authRoutes = require("./routes/auth");
 app.use("/auth", authRoutes);
 
 const usuariosRoutes = require("./routes/usuarios");
-app.use("/usuarios"), usuariosRoutes;
+app.use("/usuarios", usuariosRoutes);
 
 app.get("/", (req, res) => {
     res.json({
