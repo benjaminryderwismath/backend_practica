@@ -20,9 +20,9 @@ app.get("/", (req, res) => {
 
 app.get("/health", (req, res) => {
     res.json({
-        status: "ok",
-        message: "API funcionando",
-        timestamp: new Date()
+    status: "ok",
+    message: "API funcionando",
+    timestamp: new Date()
     });
 });
 
