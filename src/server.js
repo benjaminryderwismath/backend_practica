@@ -13,6 +13,10 @@ const registrar = async (req, res) => {
         [nombre, email, hashedPassword]
     );
 
+    app.post("/tes", (req,res) => {
+        res.json({mesaje: "el servidor responde corectamente"});
+    });
+
     res.status(201).json(result.rows[0]);
     } catch (error) {
     console.error(error);
