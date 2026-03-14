@@ -18,11 +18,12 @@ app.get("/", (req, res) => {
     });
 });
 
-app.get("/health", (req, res) => {
+app.get("/", (req, res) => {
     res.json({
-    status: "ok",
-    message: "API funcionando",
-    timestamp: new Date()
+        message: "Servidor nuevo funcionando",
+        endpoints: {
+            health: "/health"
+        }
     });
 });
 
