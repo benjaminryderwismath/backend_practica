@@ -1,34 +1,23 @@
 
-require("dotenv").config();
+const pool = require("../config/db");
+const bcrypt = require("bcrypt");
 
-const express = require("express");
-const app = express();
+const registrar = async (req, res) => {
+    try {
+    const { nombre, email, password } = req.body;
 
-app.use(express.json());
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-const authRoutes = require("./routes/auth");
-app.use("/auth", authRoutes);
+    const result = await pool.query(
+        "INSERT INTO usuarios (nombre, email, password) VALUES ($1,$2,$3) RETURNING id,nombre,email",
+        [nombre, email, hashedPassword]
+    );
 
-app.get("/", (req, res) => {
-    res.json({
-        message: "Backend API funcionando",
-        endpoints: {
-            health: "/health"
-        }
-    });
-});
+    res.status(201).json(result.rows[0]);
+    } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error registrando usuario" });
+    }
+};
 
-app.get("/", (req, res) => {
-    res.json({
-        message: "Servidor nuevo funcionando",
-        endpoints: {
-            health: "/health"
-        }
-    });
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-    console.log("Servidor corriendo en puerto", PORT);
-});
+module.exports = { registrar };
